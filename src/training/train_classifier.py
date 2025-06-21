@@ -12,8 +12,8 @@ import numpy as np
 from tqdm import tqdm
 from typing import Dict, Any, Tuple, List
 
-from ..models import EEGClassifier
-from ..data import CATVisDataLoader, DataPreprocessor
+from models import EEGClassifier
+from data import CATVisDataLoader, DataPreprocessor
 
 
 class ClassifierTrainer:
@@ -233,7 +233,7 @@ def train_eeg_classifier(config_path: str = "config/config.yaml") -> ClassifierT
     Complete training pipeline for EEG classification.
     Replicates the exact workflow from original eeg_classification.py notebook.
     """
-    from ..data import load_config
+    from data import load_config
     
     # Load configuration
     config = load_config(config_path)

@@ -10,7 +10,7 @@ from typing import Dict, Any, List, Tuple
 from tqdm import tqdm
 from torch.utils.data import DataLoader
 
-from ..data import EEGTextDataset
+from data import EEGTextDataset
 
 
 class TextRetrieval:

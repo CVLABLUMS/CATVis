@@ -11,8 +11,8 @@ import clip
 from tqdm import tqdm
 from typing import Dict, Any, Tuple, List
 
-from ..models import ContrastiveEncoder, clip_style_contrastive_loss
-from ..data import CATVisDataLoader, DataPreprocessor
+from models import ContrastiveEncoder, clip_style_contrastive_loss
+from data import CATVisDataLoader, DataPreprocessor
 
 
 class ContrastiveTrainer:
@@ -285,7 +285,7 @@ def train_contrastive_model(config_path: str = "config/config.yaml") -> Contrast
     Complete training pipeline for contrastive EEG-text alignment.
     Replicates the exact workflow from original cross_modal_alignment.py notebook.
     """
-    from ..data import load_config
+    from data import load_config
     
     # Load configuration
     config = load_config(config_path)

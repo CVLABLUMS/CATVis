@@ -17,8 +17,8 @@ from tqdm import tqdm
 from transformers import CLIPTextModel, CLIPTokenizer
 from diffusers import AutoencoderKL, UNet2DConditionModel, PNDMScheduler
 
-from ..models import EEGClassifier
-from .retrieval import TextRetrieval
+from models import EEGClassifier
+from pipeline.retrieval import TextRetrieval
 
 
 class ImageGenerator:
