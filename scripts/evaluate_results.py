@@ -15,8 +15,65 @@ from typing import Optional
 # Add src to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from data import load_config, CATVisDataLoader
+from data import load_config, CATVisDataLoader, DataPreprocessor
 from evaluation import EvaluationMetrics
+from models import ContrastiveEncoder
+
+
+def evaluate_contrastive_retrieval(config_path: str = "config/config.yaml") -> dict:
+    """
+    Evaluate contrastive model retrieval performance.
+    """
+    # Load configuration
+    config = load_config(config_path)
+    
+    # Set up device
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+    
+    # Load contrastive model
+    print("Loading contrastive model...")
+    contrastive_model = ContrastiveEncoder(config).to(device)
+    contrastive_checkpoint = os.path.join(
+        config['checkpoints']['root_dir'], 
+        config['checkpoints']['contrastive_model']
+    )
+    
+    if not os.path.exists(contrastive_checkpoint):
+        raise FileNotFoundError(f"Contrastive model checkpoint not found: {contrastive_checkpoint}")
+    
+    contrastive_model.load_pretrained_weights(contrastive_checkpoint)
+    print(f"Loaded contrastive model from: {contrastive_checkpoint}")
+    
+    # Load data
+    print("Loading data...")
+    data_loader = CATVisDataLoader(config)
+    df = data_loader.get_dataset_dataframe()
+    train_df, val_df, test_df = data_loader.get_train_val_test_splits(df)
+    
+    # Create contrastive datasets
+    preprocessor = DataPreprocessor(config)
+    _, _, test_dataset = preprocessor.create_contrastive_datasets(
+        train_df, val_df, test_df
+    )
+    
+    # Create data loader for contrastive evaluation
+    _, _, test_loader = preprocessor.create_data_loaders(
+        test_dataset, test_dataset, test_dataset,
+        batch_size=config['contrastive_training']['batch_size']
+    )
+    
+    # Import and use the evaluation method from ContrastiveTrainer
+    from training.train_contrastive import ContrastiveTrainer
+    
+    # Create a trainer instance just for evaluation
+    trainer = ContrastiveTrainer(config, device)
+    trainer.eeg_model = contrastive_model  # Use loaded model
+    
+    # Run retrieval evaluation
+    retrieval_results = trainer.evaluate_retrieval(test_loader)
+    
+    return retrieval_results
 
 
 def evaluate_catvis_results(config_path: str = "config/config.yaml",
@@ -128,32 +185,47 @@ def main():
         default='all',
         help='Which metrics to compute (default: all)'
     )
+    parser.add_argument(
+        '--contrastive',
+        action='store_true',
+        help='Evaluate contrastive model retrieval performance only'
+    )
     
     args = parser.parse_args()
     
     print("=== CATVis Results Evaluation ===")
     print(f"Config: {args.config}")
-    print(f"Metrics: {args.metrics}")
     
     try:
-        eval_results = evaluate_catvis_results(
-            config_path=args.config,
-            results_dir=args.results_dir
-        )
+        if args.contrastive:
+            print("Mode: Contrastive retrieval evaluation only")
+            eval_results = evaluate_contrastive_retrieval(config_path=args.config)
+        else:
+            print(f"Metrics: {args.metrics}")
+            eval_results = evaluate_catvis_results(
+                config_path=args.config,
+                results_dir=args.results_dir
+            )
         
         print(f"\n✅ Evaluation completed successfully!")
         print(f"\n📊 Results Summary:")
         
-        for category, metrics in eval_results.items():
-            print(f"\n{category.upper()}:")
-            if isinstance(metrics, dict):
-                for metric, value in metrics.items():
-                    if isinstance(value, float):
-                        print(f"  {metric}: {value:.4f}")
-                    else:
-                        print(f"  {metric}: {value}")
-            else:
-                print(f"  {metrics}")
+        if args.contrastive:
+            # Handle contrastive results (recall metrics)
+            for metric, value in eval_results.items():
+                print(f"  {metric}: {value:.2f}%")
+        else:
+            # Handle general evaluation results
+            for category, metrics in eval_results.items():
+                print(f"\n{category.upper()}:")
+                if isinstance(metrics, dict):
+                    for metric, value in metrics.items():
+                        if isinstance(value, float):
+                            print(f"  {metric}: {value:.4f}")
+                        else:
+                            print(f"  {metric}: {value}")
+                else:
+                    print(f"  {metrics}")
         
         return 0
         
