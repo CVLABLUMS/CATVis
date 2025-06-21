@@ -1,11 +1,11 @@
-# CATVis: EEG-to-Image Generation Pipeline
+# CATVis: Context-Aware Thought Visualization
 
-This repository contains the implementation of the CATVis (Category-Aligned Thought Visualization) research project for generating images from EEG brain signals.
+This repository contains the implementation of the CATVis (Context-Aware Thought Visualization) research project for generating images from EEG brain signals.
 
 ## Repository Structure
 
 ```
-catvis-refactoring/
+CATVis/
 ├── README.md
 ├── requirements.txt
 ├── config/

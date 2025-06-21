@@ -1,5 +1,5 @@
 """
-CATVis: Category-Aligned Thought Visualization
+CATVis: Context-Aware Thought Visualization
 EEG-to-Image Generation Research Pipeline
 """
 

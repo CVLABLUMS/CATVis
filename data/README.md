@@ -1,6 +1,6 @@
 # Data Directory Setup
 
-This directory should contain the required data files for the CATVis research project.
+This directory should contain the required data files for the CATVis (Context-Aware Thought Visualization) research project.
 
 ## Required Files
 
