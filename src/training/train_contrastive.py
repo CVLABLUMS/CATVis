@@ -193,7 +193,7 @@ class ContrastiveTrainer:
         
         # Extract unique captions for retrieval corpus
         retrieval_df = test_loader.dataset.df.drop_duplicates(subset=["captions"])
-        from ..data import EEGTextDataset
+        from data import EEGTextDataset
         from torch.utils.data import DataLoader
         retrieval_dataset = EEGTextDataset(retrieval_df)
         retrieval_dataloader = DataLoader(retrieval_dataset, batch_size=128, shuffle=False)
