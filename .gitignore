@@ -1,0 +1,186 @@
+# CATVis Research Repository - .gitignore
+
+# =============================================================================
+# Python
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# =============================================================================
+# Data Files (should be placed manually)
+# =============================================================================
+data/*.pth
+data/*.pkl
+data/*.npz
+data/*.h5
+data/*.hdf5
+data/imageNet_images/
+data/eeg_55_95_std.pth
+data/block_splits_by_image_all.pth
+data/captions_with_bbox_data.pth
+data/imagenet_class_labels.txt
+
+# =============================================================================
+# Model Checkpoints & Weights
+# =============================================================================
+checkpoints/*.pth
+checkpoints/*.pt
+checkpoints/*.ckpt
+checkpoints/*.safetensors
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+
+# =============================================================================
+# Output & Results
+# =============================================================================
+outputs/
+results/
+generated_images/
+ground_truth_images/
+logs/
+plots/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.pdf
+all_labels.pkl
+all_predictions.pkl
+generation_track.pkl
+evaluation_results.pkl
+
+# =============================================================================
+# Environment & Configuration
+# =============================================================================
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.conda/
+conda-meta/
+
+# =============================================================================
+# Jupyter Notebooks
+# =============================================================================
+.ipynb_checkpoints/
+*.ipynb
+
+# =============================================================================
+# IDEs & Editors
+# =============================================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# =============================================================================
+# Research & Development
+# =============================================================================
+experiments/
+temp/
+tmp/
+scratch/
+debug/
+test_outputs/
+wandb/
+.wandb/
+mlruns/
+.mlflow/
+
+# =============================================================================
+# System Files
+# =============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# =============================================================================
+# Documentation Build
+# =============================================================================
+docs/_build/
+docs/build/
+site/
+
+# =============================================================================
+# Large Files & Binaries
+# =============================================================================
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# =============================================================================
+# GPU/CUDA Cache
+# =============================================================================
+.nv/
+
+# =============================================================================
+# Custom for CATVis
+# =============================================================================
+# Hugging Face cache
+.cache/
+transformers_cache/
+diffusers_cache/
+
+# CLIP model cache
+clip_cache/
+
+# Custom config files (keep template)
+config/custom_*.yaml
+config/local_*.yaml
+
+# Temporary pipeline outputs
+temp_gt_resized/
+visual_grid_*.png
+confusion_matrix_*.png
+training_curves_*.png 
