@@ -96,7 +96,7 @@ class_prompts:
   n03445777: 'golf ball'
   n03452741: 'grand piano'
   n03584829: 'smoothing iron'
-  n03590841: 'Orange jack-o'-lantern'
+  n03590841: "orange jack-o'-lantern"
   n03709823: 'mailbag'
   n03773504: 'missile'
   n03775071: 'mitten or glove'
