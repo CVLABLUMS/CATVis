@@ -56,6 +56,55 @@ catvis-refactoring/
 3. Run training scripts in order
 4. Execute pipeline and evaluation
 
+## Usage
+
+### 1. Train Models
+
+```bash
+# Train EEG classifier (required first)
+python scripts/train_eeg_classifier.py
+
+# Train contrastive model (required second)
+python scripts/train_contrastive_model.py
+```
+
+### 2. Run Image Generation Pipeline
+
+```bash
+# Generate images for all subjects
+python scripts/run_pipeline.py
+
+# Generate for specific subjects only
+python scripts/run_pipeline.py --subjects "1,2,4"
+
+# Test run with limited batches
+python scripts/run_pipeline.py --max-batches 5
+
+# Dry run (setup only, no generation)
+python scripts/run_pipeline.py --dry-run
+```
+
+### 3. Evaluate Results
+
+```bash
+# Run all evaluation metrics
+python scripts/evaluate_results.py
+
+# Evaluate specific results directory
+python scripts/evaluate_results.py --results-dir ./custom_results
+
+# Run only generation metrics (skip classification)
+python scripts/evaluate_results.py --metrics generation
+```
+
+### Custom Configuration
+
+All scripts accept a `--config` parameter to specify custom configuration:
+
+```bash
+python scripts/train_eeg_classifier.py --config custom_config.yaml
+```
+
 ## Research Paper
 
 [Link to paper when published] 
