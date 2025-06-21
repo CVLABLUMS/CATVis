@@ -1,0 +1,115 @@
+# CATVis Configuration File
+
+# Global settings
+seed: 45
+device: "cuda"  # will fallback to cpu if cuda not available
+
+# Data paths (relative to project root)
+data:
+  root_dir: "./data"
+  eeg_file: "eeg_55_95_std.pth"
+  splits_file: "block_splits_by_image_all.pth"
+  captions_file: "captions_with_bbox_data.pth"
+  imagenet_labels: "imagenet_class_labels.txt"
+  imagenet_images: "imageNet_images"
+
+# Model checkpoints
+checkpoints:
+  root_dir: "./checkpoints"
+  eeg_classifier: "eeg_classifier_best.pth"
+  contrastive_model: "contrastive_model_best.pth"
+
+# Output directories
+output:
+  root_dir: "./outputs"
+  generated_images: "generated_images"
+  ground_truth_images: "ground_truth_images"
+  results: "results"
+
+# EEG Classification Training
+eeg_classification:
+  batch_size: 128
+  num_epochs: 120
+  learning_rate: 0.0001
+  time_low: 20
+  time_high: 460
+  n_outputs: 40
+  n_chans: 128
+  n_times: 440
+  model_params:
+    n_filters_time: 40
+    filter_time_length: 25
+    pool_time_length: 75
+    pool_time_stride: 15
+    final_fc_length: 920
+
+# Contrastive Training  
+contrastive_training:
+  batch_size: 32
+  num_epochs: 100
+  learning_rate: 0.0001
+  temperature: 0.07
+  patience: 15
+  clip_model: "ViT-L/14"
+
+# Image Generation Pipeline
+generation:
+  batch_size: 1
+  num_samples: 4
+  num_inference_steps: 100
+  guidance_scale: 7.5
+  beta_alpha: 10
+  beta_beta: 10
+  stable_diffusion_model: "stable-diffusion-v1-5/stable-diffusion-v1-5"
+
+# Evaluation Metrics
+evaluation:
+  n_way: 50
+  num_trials: 50
+  top_k: 1
+  inception_batch_size: 32
+  fid_batch_size: 50
+  fid_dims: 2048
+
+# Class mappings (from original prompt_dict)
+class_prompts:
+  n02106662: 'german shepherd dog'
+  n02124075: 'Egyptian cat'
+  n02281787: 'lycaenid butterfly'
+  n02389026: 'sorrel horse'
+  n02492035: 'white-faced capuchin (Cebus)'
+  n02504458: 'African elephant'
+  n02510455: 'panda'
+  n02607072: 'anemone fish'
+  n02690373: 'airliner'
+  n02906734: 'broom'
+  n02951358: 'canoe or kayak'
+  n02992529: 'cellular telephone'
+  n03063599: 'coffee mug'
+  n03100240: 'old convertible'
+  n03180011: 'desktop computer'
+  n03197337: 'digital watch'
+  n03272010: 'electric guitar'
+  n03272562: 'electric locomotive'
+  n03297495: 'espresso maker'
+  n03376595: 'folding chair'
+  n03445777: 'golf ball'
+  n03452741: 'grand piano'
+  n03584829: 'smoothing iron'
+  n03590841: 'Orange jack-o'-lantern'
+  n03709823: 'mailbag'
+  n03773504: 'missile'
+  n03775071: 'mitten or glove'
+  n03792782: 'mountain bike'
+  n03792972: 'mountain tent'
+  n03877472: 'pajama'
+  n03888257: 'parachute'
+  n03982430: 'pool table or billiard table or snooker table'
+  n04044716: 'radio telescope'
+  n04069434: 'reflex camera'
+  n04086273: 'revolver, six-shooter'
+  n04120489: 'running shoe'
+  n07753592: 'banana'
+  n07873807: 'pizza'
+  n11939491: 'daisy'
+  n13054560: 'bolete mushroom' 
