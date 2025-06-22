@@ -276,7 +276,10 @@ def train_eeg_classifier(config_path: str = "config/config.yaml") -> ClassifierT
     test_results = trainer.test(test_loader)
     
     # Plot and save results
-    trainer.plot_training_curves()
+    output_dir = config['output']['root_dir']
+    os.makedirs(output_dir, exist_ok=True)
+    curves_path = os.path.join(output_dir, "training_curves.png")
+    trainer.plot_training_curves(save_path=curves_path)
     trainer.save_results(test_results)
     
     return trainer 
