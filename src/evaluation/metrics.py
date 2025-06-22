@@ -14,6 +14,7 @@ import seaborn as sns
 from PIL import Image
 from typing import Dict, Any, List, Tuple
 from tqdm import tqdm
+from torch.utils.data import DataLoader
 
 from sklearn.metrics import f1_score, confusion_matrix, classification_report, accuracy_score
 from torchvision.models import ViT_H_14_Weights, vit_h_14
@@ -22,6 +23,9 @@ from torchvision.models.inception import inception_v3
 from pytorch_fid import fid_score
 from scipy.stats import entropy
 import torchvision.transforms as transforms
+import clip
+
+from data import EEGTextDataset
 
 
 class EvaluationMetrics:
@@ -500,3 +504,126 @@ class EvaluationMetrics:
         
         print(f"\nEvaluation complete! Results saved to {results_file}")
         return eval_results 
+
+
+def evaluate_retrieval_performance(contrastive_model, test_df, device: torch.device, 
+                                 clip_model_name: str = "ViT-L/14") -> Dict[str, float]:
+    """
+    Consolidated retrieval evaluation function.
+    Eliminates code duplication between training and pipeline scripts.
+    
+    Args:
+        contrastive_model: Trained contrastive EEG model
+        test_df: Test dataframe with EEG data and captions
+        device: Device to run evaluation on
+        clip_model_name: CLIP model name for text encoding
+        
+    Returns:
+        Dictionary with recall@k metrics
+    """
+    print("Evaluating retrieval performance...")
+    
+    # Load CLIP model (if not already loaded)
+    if not hasattr(evaluate_retrieval_performance, '_clip_model_cache'):
+        clip_model, _ = clip.load(clip_model_name, device=device)
+        clip_model.eval()
+        for p in clip_model.parameters():
+            p.requires_grad = False
+        evaluate_retrieval_performance._clip_model_cache = clip_model
+    
+    clip_model = evaluate_retrieval_performance._clip_model_cache
+    
+    # Extract unique captions for retrieval corpus
+    retrieval_df = test_df.drop_duplicates(subset=["captions"])
+    retrieval_dataset = EEGTextDataset(retrieval_df)
+    retrieval_dataloader = DataLoader(retrieval_dataset, batch_size=128, shuffle=False)
+    
+    # Get unique caption embeddings
+    unique_caption_embeds, unique_captions = _extract_text_embeddings(
+        retrieval_dataloader, clip_model, device
+    )
+    
+    # Create test dataset for EEG embeddings
+    test_dataset = EEGTextDataset(test_df)
+    test_loader = DataLoader(test_dataset, batch_size=128, shuffle=False)
+    
+    # Get all EEG embeddings and true captions
+    all_eeg_embeds, all_true_captions = _extract_eeg_embeddings(
+        test_loader, contrastive_model, device
+    )
+    
+    # Compute similarities
+    all_eeg_embeds = all_eeg_embeds.to(device)
+    unique_caption_embeds = unique_caption_embeds.to(device)
+    
+    sim_e2t = all_eeg_embeds @ unique_caption_embeds.t()  # [N, M]
+    
+    # Create caption to index mapping
+    caption_to_idx = {cap: idx for idx, cap in enumerate(unique_captions)}
+    
+    # Get true text indices
+    true_text_indices = []
+    for cap in all_true_captions:
+        correct_idx = caption_to_idx[cap]
+        true_text_indices.append(correct_idx)
+    true_text_indices = torch.tensor(true_text_indices, device=device)
+    
+    # Compute retrieval metrics
+    N = len(all_true_captions)
+    topks = [1, 5, 10]
+    hits_e2t = {k: 0 for k in topks}
+    
+    for i in range(N):
+        row = sim_e2t[i]  # [M]
+        sorted_idx = torch.argsort(row, descending=True)
+        correct_idx = true_text_indices[i]
+        rank = (sorted_idx == correct_idx).nonzero(as_tuple=True)[0].item()
+        for k in topks:
+            if rank < k:
+                hits_e2t[k] += 1
+    
+    # Calculate recall scores
+    results = {}
+    print("\n===== RETRIEVAL EVALUATION (EEG->Text) =====")
+    for k in topks:
+        recall = hits_e2t[k] / N * 100
+        results[f'recall@{k}'] = recall
+        print(f"Recall@{k}: {recall:.2f}%")
+    
+    return results
+
+
+def _extract_text_embeddings(dataloader, clip_model, device) -> Tuple[torch.Tensor, List[str]]:
+    """Extract text embeddings using CLIP."""
+    all_text_embeds = []
+    all_text_labels = []
+
+    with torch.no_grad():
+        for eeg_batch, text_batch in tqdm(dataloader, desc="Extracting text embeddings"):
+            text_tokens = clip.tokenize(text_batch, truncate=True).to(device)
+            text_emb = clip_model.encode_text(text_tokens).float()
+            text_emb = F.normalize(text_emb, dim=-1)
+
+            all_text_embeds.append(text_emb.cpu())
+            all_text_labels.extend(text_batch)
+
+    all_text_embeds = torch.cat(all_text_embeds, dim=0)  # [N, 768]
+    return all_text_embeds, all_text_labels
+
+
+def _extract_eeg_embeddings(dataloader, contrastive_model, device) -> Tuple[torch.Tensor, List[str]]:
+    """Extract EEG embeddings."""
+    all_eeg_embeds = []
+    all_true_captions = []
+
+    contrastive_model.eval()
+    with torch.no_grad():
+        for eeg_batch, caption_batch in tqdm(dataloader, desc="Extracting EEG embeddings"):
+            eeg_batch = eeg_batch.to(device)
+            eeg_embeds = contrastive_model(eeg_batch)  # [B, 768]
+            eeg_embeds = F.normalize(eeg_embeds, dim=-1)
+            all_eeg_embeds.append(eeg_embeds.cpu())
+            all_true_captions.extend(caption_batch)
+
+    all_eeg_embeds = torch.cat(all_eeg_embeds, dim=0)  # [N, 768]
+    return all_eeg_embeds, all_true_captions 

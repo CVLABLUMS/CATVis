@@ -13,6 +13,7 @@ from typing import Dict, Any, Tuple, List
 
 from models import ContrastiveEncoder, clip_style_contrastive_loss
 from data import CATVisDataLoader, DataPreprocessor
+from evaluation.metrics import evaluate_retrieval_performance
 
 
 class ContrastiveTrainer:
@@ -183,101 +184,6 @@ class ContrastiveTrainer:
             'train': train_history,
             'val': val_history
         }
-    
-    def evaluate_retrieval(self, test_loader) -> Dict[str, float]:
-        """
-        Evaluate EEG->Text retrieval performance.
-        Replicates evaluation from original notebook.
-        """
-        print("Evaluating retrieval performance...")
-        
-        # Extract unique captions for retrieval corpus
-        retrieval_df = test_loader.dataset.df.drop_duplicates(subset=["captions"])
-        from data import EEGTextDataset
-        from torch.utils.data import DataLoader
-        retrieval_dataset = EEGTextDataset(retrieval_df)
-        retrieval_dataloader = DataLoader(retrieval_dataset, batch_size=128, shuffle=False)
-        
-        # Get unique caption embeddings
-        unique_caption_embeds, unique_captions = self._extract_text_embeddings(retrieval_dataloader)
-        
-        # Get all EEG embeddings and true captions
-        all_eeg_embeds, all_true_captions = self._extract_eeg_embeddings(test_loader)
-        
-        # Compute similarities
-        all_eeg_embeds = all_eeg_embeds.to(self.device)
-        unique_caption_embeds = unique_caption_embeds.to(self.device)
-        
-        sim_e2t = all_eeg_embeds @ unique_caption_embeds.t()  # [N, M]
-        
-        # Create caption to index mapping
-        caption_to_idx = {cap: idx for idx, cap in enumerate(unique_captions)}
-        
-        # Get true text indices
-        true_text_indices = []
-        for cap in all_true_captions:
-            correct_idx = caption_to_idx[cap]
-            true_text_indices.append(correct_idx)
-        true_text_indices = torch.tensor(true_text_indices, device=self.device)
-        
-        # Compute retrieval metrics
-        N = len(all_true_captions)
-        topks = [1, 5, 10]
-        hits_e2t = {k: 0 for k in topks}
-        
-        for i in range(N):
-            row = sim_e2t[i]  # [M]
-            sorted_idx = torch.argsort(row, descending=True)
-            correct_idx = true_text_indices[i]
-            rank = (sorted_idx == correct_idx).nonzero(as_tuple=True)[0].item()
-            for k in topks:
-                if rank < k:
-                    hits_e2t[k] += 1
-        
-        # Calculate recall scores
-        results = {}
-        print("\n===== RETRIEVAL EVALUATION (EEG->Text) =====")
-        for k in topks:
-            recall = hits_e2t[k] / N * 100
-            results[f'recall@{k}'] = recall
-            print(f"Recall@{k}: {recall:.2f}%")
-        
-        return results
-    
-    def _extract_text_embeddings(self, dataloader) -> Tuple[torch.Tensor, List[str]]:
-        """Extract text embeddings using CLIP."""
-        all_text_embeds = []
-        all_text_labels = []
-
-        self.eeg_model.eval()
-        with torch.no_grad():
-            for eeg_batch, text_batch in tqdm(dataloader, desc="Extracting text embeddings"):
-                text_tokens = clip.tokenize(text_batch, truncate=True).to(self.device)
-                text_emb = self.clip_model.encode_text(text_tokens).float()
-                text_emb = F.normalize(text_emb, dim=-1)
-
-                all_text_embeds.append(text_emb.cpu())
-                all_text_labels.extend(text_batch)
-
-        all_text_embeds = torch.cat(all_text_embeds, dim=0)  # [N, 768]
-        return all_text_embeds, all_text_labels
-    
-    def _extract_eeg_embeddings(self, dataloader) -> Tuple[torch.Tensor, List[str]]:
-        """Extract EEG embeddings."""
-        all_eeg_embeds = []
-        all_true_captions = []
-
-        self.eeg_model.eval()
-        with torch.no_grad():
-            for eeg_batch, caption_batch in tqdm(dataloader, desc="Extracting EEG embeddings"):
-                eeg_batch = eeg_batch.to(self.device)
-                eeg_embeds = self.eeg_model(eeg_batch)  # [B, 768]
-                eeg_embeds = F.normalize(eeg_embeds, dim=-1)
-                all_eeg_embeds.append(eeg_embeds.cpu())
-                all_true_captions.extend(caption_batch)
-
-        all_eeg_embeds = torch.cat(all_eeg_embeds, dim=0)  # [N, 768]
-        return all_eeg_embeds, all_true_captions
 
 
 def train_contrastive_model(config_path: str = "config/config.yaml",
@@ -340,6 +246,8 @@ def train_contrastive_model(config_path: str = "config/config.yaml",
         training_history = trainer.train(train_loader, val_loader)
     
     # Evaluate retrieval performance (common for both modes)
-    retrieval_results = trainer.evaluate_retrieval(test_loader)
+    retrieval_results = evaluate_retrieval_performance(
+        trainer.eeg_model, test_df, device, config['contrastive_training']['clip_model']
+    )
     
     return trainer 

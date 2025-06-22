@@ -17,6 +17,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 from data import load_config, CATVisDataLoader, DataPreprocessor
 from models import EEGClassifier, ContrastiveEncoder
 from pipeline import TextRetrieval, ImageGenerator
+from evaluation.metrics import evaluate_retrieval_performance
 
 
 def run_catvis_pipeline(config_path: str = "config/config.yaml", 
@@ -88,10 +89,13 @@ def run_catvis_pipeline(config_path: str = "config/config.yaml",
     # Setup Text Retrieval
     print("\n=== Setting Up Text Retrieval ===")
     text_retrieval = TextRetrieval(config, contrastive_model, device)
+    # Always use original full test set for retrieval corpus and evaluation (consistency)
     text_retrieval.setup_retrieval_corpus(test_df)
     
-    # Evaluate retrieval performance
-    retrieval_results = text_retrieval.evaluate_retrieval_accuracy(test_df)
+    # Evaluate retrieval performance on original full test set
+    retrieval_results = evaluate_retrieval_performance(
+        contrastive_model, test_df, device, config['contrastive_training']['clip_model']
+    )
     
     # Setup Image Generator
     print("\n=== Setting Up Image Generator ===")

@@ -63,15 +63,11 @@ def evaluate_contrastive_retrieval(config_path: str = "config/config.yaml") -> d
         batch_size=config['contrastive_training']['batch_size']
     )
     
-    # Import and use the evaluation method from ContrastiveTrainer
-    from training.train_contrastive import ContrastiveTrainer
-    
-    # Create a trainer instance just for evaluation
-    trainer = ContrastiveTrainer(config, device)
-    trainer.eeg_model = contrastive_model  # Use loaded model
-    
-    # Run retrieval evaluation
-    retrieval_results = trainer.evaluate_retrieval(test_loader)
+    # Run retrieval evaluation using shared function
+    from evaluation.metrics import evaluate_retrieval_performance
+    retrieval_results = evaluate_retrieval_performance(
+        contrastive_model, test_df, device, config['contrastive_training']['clip_model']
+    )
     
     return retrieval_results
 
