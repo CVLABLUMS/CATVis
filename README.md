@@ -113,6 +113,29 @@ python scripts/evaluate_results.py --results-dir ./custom_results
 python scripts/evaluate_results.py --metrics generation
 ```
 
+### 5. Clean Up Generated Files
+
+```bash
+# Remove outputs directory (default - safe and simple)
+python cleanup.py
+
+# Remove only CATVis model checkpoints
+python cleanup.py --mode checkpoints
+
+# Remove both outputs and CATVis checkpoints
+python cleanup.py --mode all
+
+# See what would be removed without actually removing
+python cleanup.py --dry-run
+```
+
+**Cleanup Modes:**
+- `outputs`: Remove entire outputs/ directory (training curves, results, generated images, etc.)
+- `checkpoints`: Remove only CATVis model checkpoints (eeg_classifier_best.pth, contrastive_model_best.pth)  
+- `all`: Remove both outputs directory and CATVis checkpoints
+
+**Note**: The `checkpoints` mode only removes CATVis-specific checkpoints, preserving any other .pth files you may have.
+
 ### Custom Configuration
 
 All scripts accept a `--config` parameter to specify custom configuration:
