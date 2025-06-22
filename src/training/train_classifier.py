@@ -235,16 +235,13 @@ def train_eeg_classifier(config_path: str = "config/config.yaml",
     Complete training pipeline for EEG classification.
     Replicates the exact workflow from original eeg_classification.py notebook.
     """
-    from data import load_config
-    
-    # Set seed early like original notebook (before any operations)
-    seed = 45  # Same as original notebook
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)  # Always call like original
+    from data import load_config, setup_deterministic_environment
     
     # Load configuration
     config = load_config(config_path)
+    
+    # Setup comprehensive deterministic environment
+    setup_deterministic_environment(seed=config['seed'], use_deterministic_algorithms=True)
     
     # Set up device 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

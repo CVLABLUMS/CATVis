@@ -14,7 +14,7 @@ from typing import List, Optional
 # Add src to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from data import load_config, CATVisDataLoader, DataPreprocessor
+from data import load_config, CATVisDataLoader, DataPreprocessor, setup_deterministic_environment
 from models import EEGClassifier, ContrastiveEncoder
 from pipeline import TextRetrieval, ImageGenerator
 from evaluation.metrics import evaluate_retrieval_performance
@@ -30,12 +30,11 @@ def run_catvis_pipeline(config_path: str = "config/config.yaml",
     # Load configuration
     config = load_config(config_path)
     
-    # Set up device and seed
+    # Setup comprehensive deterministic environment
+    setup_deterministic_environment(seed=config['seed'], use_deterministic_algorithms=True)
+    
+    # Set up device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    torch.manual_seed(config['seed'])
-    np.random.seed(config['seed'])
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed(config['seed'])
     
     print(f"Using device: {device}")
     print(f"Subject filter: {subject_filter}")

@@ -193,17 +193,16 @@ def train_contrastive_model(config_path: str = "config/config.yaml",
     Complete training pipeline for contrastive EEG-text alignment.
     Replicates the exact workflow from original cross_modal_alignment.py notebook.
     """
-    from data import load_config
+    from data import load_config, setup_deterministic_environment
     
     # Load configuration
     config = load_config(config_path)
     
-    # Set up device and seed
+    # Setup comprehensive deterministic environment
+    setup_deterministic_environment(seed=config['seed'], use_deterministic_algorithms=True)
+    
+    # Set up device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    torch.manual_seed(config['seed'])
-    np.random.seed(config['seed'])
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed(config['seed'])
     
     print(f"Using device: {device}")
     
