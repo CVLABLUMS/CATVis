@@ -4,7 +4,7 @@ Data preprocessing and PyTorch dataset classes for CATVis.
 
 import torch
 import numpy as np
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, TensorDataset
 from typing import Dict, Any, List, Tuple
 
 
@@ -74,14 +74,14 @@ class DataPreprocessor:
         self.config = config
         
     def create_classification_datasets(self, train_df, val_df, test_df, 
-                                     time_low: int = None, time_high: int = None) -> Tuple[EEGDataset, EEGDataset, EEGDataset]:
-        """Create datasets for EEG classification."""
+                                     time_low: int = None, time_high: int = None) -> Tuple[TensorDataset, TensorDataset, TensorDataset]:
+        """Create datasets for EEG classification using TensorDataset (like original notebook)."""
         if time_low is None:
             time_low = self.config['eeg_classification']['time_low']
         if time_high is None:
             time_high = self.config['eeg_classification']['time_high']
             
-        # Extract EEG data and labels
+        # Extract EEG data and labels (exactly like original notebook)
         eeg_train = np.array(train_df['eeg'].apply(lambda x: x[:, time_low:time_high]).tolist())
         train_labels = train_df['label'].tolist()
         
@@ -91,10 +91,13 @@ class DataPreprocessor:
         eeg_test = np.array(test_df['eeg'].apply(lambda x: x[:, time_low:time_high]).tolist())
         test_labels = test_df['label'].tolist()
         
-        # Create datasets
-        train_dataset = EEGDataset(eeg_train, train_labels)
-        val_dataset = EEGDataset(eeg_val, val_labels)
-        test_dataset = EEGDataset(eeg_test, test_labels)
+        # Create TensorDatasets (exactly like original notebook)
+        train_dataset = TensorDataset(torch.tensor(eeg_train, dtype=torch.float32),
+                                      torch.tensor(train_labels, dtype=torch.long))
+        val_dataset = TensorDataset(torch.tensor(eeg_val, dtype=torch.float32),
+                                    torch.tensor(val_labels, dtype=torch.long))
+        test_dataset = TensorDataset(torch.tensor(eeg_test, dtype=torch.float32),
+                                     torch.tensor(test_labels, dtype=torch.long))
         
         return train_dataset, val_dataset, test_dataset
         

@@ -58,9 +58,9 @@ class ClassifierTrainer:
         running_loss = 0.0
         correct = 0.0
         
-        for i, batch in enumerate(train_loader):
-            eeg = batch['eeg'].to(self.device)
-            label = batch['label'].to(self.device)
+        for i, data in enumerate(train_loader):
+            eeg, label = data  # Tuple unpacking like original notebook
+            eeg, label = eeg.to(self.device), label.to(self.device)
 
             self.optimizer.zero_grad()
             outputs, eeg_embeddings = self.model(eeg)
@@ -84,9 +84,9 @@ class ClassifierTrainer:
         val_correct = 0.0
 
         with torch.no_grad():
-            for batch in val_loader:
-                eeg_val = batch['eeg'].to(self.device)
-                label_val = batch['label'].to(self.device)
+            for val_data in val_loader:
+                eeg_val, label_val = val_data  # Tuple unpacking like original notebook
+                eeg_val, label_val = eeg_val.to(self.device), label_val.to(self.device)
 
                 outputs_val, eeg_embeddings_val = self.model(eeg_val)
                 batch_val_loss = self.criterion(outputs_val, label_val)
@@ -157,9 +157,9 @@ class ClassifierTrainer:
         all_predictions = []
 
         with torch.no_grad():
-            for batch in test_loader:
-                eeg_test = batch['eeg'].to(self.device)
-                label_test = batch['label'].to(self.device)
+            for test_data in test_loader:
+                eeg_test, label_test = test_data  # Tuple unpacking like original notebook
+                eeg_test, label_test = eeg_test.to(self.device), label_test.to(self.device)
 
                 outputs_test, eeg_embeddings_test = self.model(eeg_test)
                 batch_test_loss = self.criterion(outputs_test, label_test)
