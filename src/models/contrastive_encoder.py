@@ -61,12 +61,12 @@ class ContrastiveEncoder(nn.Module):
     def load_pretrained_weights(self, checkpoint_path: str):
         """Load pretrained weights from checkpoint."""
         state_dict = torch.load(checkpoint_path, map_location='cpu')
-        self.load_state_dict(state_dict)
+        self.model.load_state_dict(state_dict)
         print(f"Loaded pretrained weights from {checkpoint_path}")
         
     def save_checkpoint(self, checkpoint_path: str):
         """Save model checkpoint."""
-        torch.save(self.state_dict(), checkpoint_path)
+        torch.save(self.model.state_dict(), checkpoint_path)
         print(f"Saved checkpoint to {checkpoint_path}")
 
 
