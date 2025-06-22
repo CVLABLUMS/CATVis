@@ -235,15 +235,17 @@ def train_eeg_classifier(config_path: str = "config/config.yaml") -> ClassifierT
     """
     from data import load_config
     
+    # Set seed early like original notebook (before any operations)
+    seed = 45  # Same as original notebook
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)  # Always call like original
+    
     # Load configuration
     config = load_config(config_path)
     
-    # Set up device and seed
+    # Set up device 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    torch.manual_seed(config['seed'])
-    np.random.seed(config['seed'])
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed(config['seed'])
     
     print(f"Using device: {device}")
     

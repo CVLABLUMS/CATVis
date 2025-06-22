@@ -136,15 +136,15 @@ class DataPreprocessor:
         if batch_size is None:
             batch_size = self.config['eeg_classification']['batch_size']
             
-        # Set up generator for reproducibility
-        generator = torch.Generator()
-        generator.manual_seed(self.config['seed'])
+        # Set up generator exactly like original notebook
+        torch_generator = torch.Generator()
+        torch_generator.manual_seed(45)  # Use same seed as original
         
         train_loader = DataLoader(
             train_dataset, 
             batch_size=batch_size, 
             shuffle=shuffle_train,
-            generator=generator
+            generator=torch_generator
         )
         val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
         test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
