@@ -280,7 +280,9 @@ class ContrastiveTrainer:
         return all_eeg_embeds, all_true_captions
 
 
-def train_contrastive_model(config_path: str = "config/config.yaml") -> ContrastiveTrainer:
+def train_contrastive_model(config_path: str = "config/config.yaml",
+                          test_only: bool = False,
+                          checkpoint_path: str = None) -> ContrastiveTrainer:
     """
     Complete training pipeline for contrastive EEG-text alignment.
     Replicates the exact workflow from original cross_modal_alignment.py notebook.
@@ -322,11 +324,22 @@ def train_contrastive_model(config_path: str = "config/config.yaml") -> Contrast
     # Initialize trainer
     trainer = ContrastiveTrainer(config, device)
     
-    # Train model
-    print("Starting contrastive training...")
-    training_history = trainer.train(train_loader, val_loader)
+    if test_only:
+        # Test-only mode: load existing checkpoint and evaluate
+        checkpoint_to_load = checkpoint_path if checkpoint_path else trainer.model_save_path
+        
+        if not os.path.exists(checkpoint_to_load):
+            raise FileNotFoundError(f"Checkpoint not found: {checkpoint_to_load}")
+        
+        print(f"Loading checkpoint: {checkpoint_to_load}")
+        trainer.eeg_model.load_pretrained_weights(checkpoint_to_load)
+        
+    else:
+        # Training mode (default)
+        print("Starting contrastive training...")
+        training_history = trainer.train(train_loader, val_loader)
     
-    # Evaluate retrieval performance
+    # Evaluate retrieval performance (common for both modes)
     retrieval_results = trainer.evaluate_retrieval(test_loader)
     
     return trainer 

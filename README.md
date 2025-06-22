@@ -68,7 +68,23 @@ python scripts/train_eeg_classifier.py
 python scripts/train_contrastive_model.py
 ```
 
-### 2. Run Image Generation Pipeline
+### 2. Test Existing Models
+
+```bash
+# Test existing EEG classifier checkpoint
+python scripts/train_eeg_classifier.py --test-only
+
+# Test existing contrastive model checkpoint
+python scripts/train_contrastive_model.py --test-only
+
+# Test with custom checkpoint path
+python scripts/train_eeg_classifier.py --test-only --checkpoint /path/to/model.pth
+python scripts/train_contrastive_model.py --test-only --checkpoint /path/to/model.pth
+```
+
+**Note**: Both training and test-only modes will generate output files (test results, training curves when applicable) in the `outputs/` directory.
+
+### 3. Run Image Generation Pipeline
 
 ```bash
 # Generate images for all subjects
@@ -84,7 +100,7 @@ python scripts/run_pipeline.py --max-batches 5
 python scripts/run_pipeline.py --dry-run
 ```
 
-### 3. Evaluate Results
+### 4. Evaluate Results
 
 ```bash
 # Run all evaluation metrics

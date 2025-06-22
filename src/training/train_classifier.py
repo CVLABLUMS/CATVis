@@ -228,7 +228,9 @@ class ClassifierTrainer:
         print(f"Results saved to {output_dir}")
 
 
-def train_eeg_classifier(config_path: str = "config/config.yaml") -> ClassifierTrainer:
+def train_eeg_classifier(config_path: str = "config/config.yaml", 
+                        test_only: bool = False,
+                        checkpoint_path: str = None) -> ClassifierTrainer:
     """
     Complete training pipeline for EEG classification.
     Replicates the exact workflow from original eeg_classification.py notebook.
@@ -269,17 +271,28 @@ def train_eeg_classifier(config_path: str = "config/config.yaml") -> ClassifierT
     # Initialize trainer
     trainer = ClassifierTrainer(config, device)
     
-    # Train model
-    training_history = trainer.train(train_loader, val_loader)
+    if test_only:
+        # Test-only mode: load existing checkpoint and test
+        checkpoint_to_load = checkpoint_path if checkpoint_path else trainer.model_save_path
+        
+        if not os.path.exists(checkpoint_to_load):
+            raise FileNotFoundError(f"Checkpoint not found: {checkpoint_to_load}")
+        
+        print(f"Loading checkpoint: {checkpoint_to_load}")
+        trainer.model.load_pretrained_weights(checkpoint_to_load)
+        
+    else:
+        # Training mode (default)
+        training_history = trainer.train(train_loader, val_loader)
+        
+        # Plot training curves
+        output_dir = config['output']['root_dir']
+        os.makedirs(output_dir, exist_ok=True)
+        curves_path = os.path.join(output_dir, "training_curves.png")
+        trainer.plot_training_curves(save_path=curves_path)
     
-    # Test model
+    # Test model and save results (common for both modes)
     test_results = trainer.test(test_loader)
-    
-    # Plot and save results
-    output_dir = config['output']['root_dir']
-    os.makedirs(output_dir, exist_ok=True)
-    curves_path = os.path.join(output_dir, "training_curves.png")
-    trainer.plot_training_curves(save_path=curves_path)
     trainer.save_results(test_results)
     
     return trainer 
