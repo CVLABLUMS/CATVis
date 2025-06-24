@@ -303,43 +303,41 @@ class EvaluationMetrics:
     def compute_fid_score(self, generated_dir: str, gt_dir: str) -> float:
         """
         Compute Fréchet Inception Distance (FID).
-        Extracted from original evaluation with exact methodology preserved.
+        Simple implementation that works, as provided by user.
         """
         print("Computing FID score...")
         
-        batch_size = self.eval_config['fid_batch_size']
-        dims = self.eval_config['fid_dims']
+        from pytorch_fid import fid_score
+        import shutil
         
         # Create temporary directory for resized GT images
-        temp_path = os.path.join(os.path.dirname(gt_dir), "temp_gt_resized")
-        os.makedirs(temp_path, exist_ok=True)
+        temp_path = os.path.join(os.path.dirname(gt_dir), "temppath")
         
-        # Resize GT images to 512x512 (as in original code)
+        # Define the transform to resize the image to 512x512
         transform = transforms.Compose([transforms.Resize((512, 512))])
         
         try:
+            # Save the transformed gt_images to temppath
+            os.makedirs(temp_path, exist_ok=True)
             for filename in os.listdir(gt_dir):
-                if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
-                    src_path = os.path.join(gt_dir, filename)
-                    dest_path = os.path.join(temp_path, filename)
-                    
-                    with Image.open(src_path) as img:
-                        transformed_img = transform(img)
-                        transformed_img.save(dest_path)
+                src_path = os.path.join(gt_dir, filename)
+                dest_path = os.path.join(temp_path, filename)
+                with Image.open(src_path) as img:
+                    transformed_img = transform(img)
+                    transformed_img.save(dest_path)
 
-            # Compute FID
+            # Calculate FID
             fid_value = fid_score.calculate_fid_given_paths(
                 [generated_dir, temp_path], 
-                batch_size=batch_size, 
+                batch_size=50, 
                 device=self.device, 
-                dims=dims
+                dims=2048
             )
             
-            print(f'FID Score: {fid_value:.4f}')
+            print('FID:', fid_value)
             
         finally:
             # Clean up temporary directory
-            import shutil
             if os.path.exists(temp_path):
                 shutil.rmtree(temp_path)
         
