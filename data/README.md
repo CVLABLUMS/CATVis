@@ -19,9 +19,8 @@ Place the following files in this directory:
 
 ## Data Sources
 
-The original data comes from:
-- EEG visual classification dataset (Kaggle: eeg-visual-classification-new)
-- ImageNet-40 subset (Kaggle: imagenet-40)
+- [EEG visual classification dataset](https://tinyurl.com/eeg-visual-classification): Download `eeg_55_95_std.pth` and `block_splits_by_image_all.pth`, and place in this directory.
+- ImageNet-40 subset (Kaggle: [imagenet-40](https://www.kaggle.com/datasets/tariq9mehmood9/imagenet-40)) 
 
 ## Directory Structure After Setup
 
@@ -40,10 +39,3 @@ data/
     │   └── ...
     └── ...
 ```
-
-## Notes
-
-- The code expects these exact file names and structure
-- Make sure all image files are accessible and not corrupted
-- Total dataset contains 40 ImageNet classes with EEG recordings
-- Missing files will cause the pipeline to fail with clear error messages 

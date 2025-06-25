@@ -53,8 +53,8 @@ data/*.hdf5
 data/imageNet_images/
 data/eeg_55_95_std.pth
 data/block_splits_by_image_all.pth
-data/captions_with_bbox_data.pth
-data/imagenet_class_labels.txt
+!data/captions_with_bbox_data.pth
+!data/imagenet_class_labels.txt
 
 # =============================================================================
 # Model Checkpoints & Weights
@@ -63,10 +63,6 @@ checkpoints/*.pth
 checkpoints/*.pt
 checkpoints/*.ckpt
 checkpoints/*.safetensors
-*.pth
-*.pt
-*.ckpt
-*.safetensors
 
 # =============================================================================
 # Output & Results
