@@ -83,6 +83,7 @@ all_labels.pkl
 all_predictions.pkl
 generation_track.pkl
 evaluation_results.pkl
+!figures/*
 
 # =============================================================================
 # Environment & Configuration
