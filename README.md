@@ -154,4 +154,4 @@ python scripts/train_eeg_classifier.py --config custom_config.yaml
 
 ## Research Paper
 
-[Link to paper when published] 
+[Research Paper](https://link.springer.com/chapter/10.1007/978-3-032-04927-8_10)
