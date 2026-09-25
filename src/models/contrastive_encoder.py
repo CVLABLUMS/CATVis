@@ -61,6 +61,8 @@ class ContrastiveEncoder(nn.Module):
     def load_pretrained_weights(self, checkpoint_path: str):
         """Load pretrained weights from checkpoint."""
         state_dict = torch.load(checkpoint_path, map_location='cpu')
+        # Released checkpoints use 'conformer.*' keys; map them to EEGConformer's names
+        state_dict = {k.removeprefix('conformer.'): v for k, v in state_dict.items()}
         self.model.load_state_dict(state_dict)
         print(f"Loaded pretrained weights from {checkpoint_path}")
         

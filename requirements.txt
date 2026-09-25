@@ -10,11 +10,11 @@ scikit-learn>=1.0.0
 tqdm>=4.62.0
 
 # EEG and Brain decoding
-braindecode>=0.7.0
+braindecode==0.8.1  # 1.x removed add_log_softmax and renamed EEGConformer layers
 torchinfo>=1.7.0
 
 # Computer Vision and ML
-clip-by-openai
+clip @ git+https://github.com/openai/CLIP.git  # PyPI clip-by-openai pins an old torch
 diffusers>=0.21.0
 transformers>=4.21.0
 huggingface_hub>=0.16.0
