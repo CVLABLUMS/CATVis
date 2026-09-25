@@ -2,6 +2,8 @@
 
 This directory stores trained model weights and checkpoints.
 
+Pretrained `eeg_classifier_best.pth` and `contrastive_model_best.pth` checkpoints are included, so you can skip training and run `--test-only` or the generation pipeline directly. Re-running training overwrites them.
+
 ## Files Generated During Training
 
 ### EEG Classification Model
@@ -33,5 +35,5 @@ The trained models are automatically loaded by the pipeline:
 ## File Sizes
 
 Expect checkpoint files to be approximately:
-- EEG classifier: ~10-20 MB
-- Contrastive model: ~10-20 MB 
+- EEG classifier: ~3 MB
+- Contrastive model: ~3 MB

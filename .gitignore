@@ -63,6 +63,9 @@ checkpoints/*.pth
 checkpoints/*.pt
 checkpoints/*.ckpt
 checkpoints/*.safetensors
+# Pretrained CATVis checkpoints are tracked
+!checkpoints/eeg_classifier_best.pth
+!checkpoints/contrastive_model_best.pth
 
 # =============================================================================
 # Output & Results
