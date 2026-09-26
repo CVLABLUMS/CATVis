@@ -184,3 +184,7 @@ temp_gt_resized/
 visual_grid_*.png
 confusion_matrix_*.png
 training_curves_*.png 
+
+# Personal Claude instructions and journal notes
+journal/
+CLAUDE.md
